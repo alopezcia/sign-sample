@@ -5,14 +5,8 @@ class Signature {
     this.width_line = 1;
     this.color = "#000000";
 
-    // this.signPadre = false;
-    // this.begin_signPadre = false;
-    // this.signMadre = false;
-    // this.begin_signMadre = false;
-
     this.sign = false;
     this.begin_sign = false;
-
 
     this.canvas = document.getElementById('canvas');
     const context = this.canvas.getContext('2d');
@@ -54,8 +48,6 @@ class Signature {
       const context = target.getContext('2d');
       // console.log( 'context', context );
       if( context ){
-        // context.lineJoin = 'round';
-        // context.lineCap = 'round';
         if (!this.begin_sign) {
           context.beginPath();
           context.moveTo(this.cursorX, this.cursorY);
@@ -69,23 +61,6 @@ class Signature {
       }
     }
   }
-
-
-  // updateMousePositionPadre(mX, mY) {
-  //   const rectPadre = this.canvasPadre.getBoundingClientRect();
-  //   const scaleXPadre = this.canvasPadre.width / rectPadre.width;
-  //   const scaleYPadre = this.canvasPadre.height / rectPadre.height;
-  //   this.cursorXPadre = (mX - rectPadre.left) * scaleXPadre;
-  //   this.cursorYPadre = (mY - rectPadre.top) * scaleYPadre;
-  // }
-  
-  // updateMousePositionMadre(mX, mY) {
-  //   const rectMadre = this.canvasMadre.getBoundingClientRect();
-  //   const scaleXMadre = this.canvasMadre.width / rectMadre.width;
-  //   const scaleYMadre = this.canvasMadre.height / rectMadre.height;
-  //   this.cursorXMadre = (mX - rectMadre.left) * scaleXMadre;
-  //   this.cursorYMadre = (mY - rectMadre.top) * scaleYMadre;
-  // }
   
   mouseDownEvents() {
     this.canvas.addEventListener("mousedown", 
@@ -120,40 +95,11 @@ class Signature {
     })
   }
 
-  // createSignaturePadre() {
-  //   if (!this.begin_signPadre) {
-  //     this.contextPadre.beginPath();
-  //     this.contextPadre.moveTo(this.cursorXPadre, this.cursorYPadre);
-  //     this.begin_signPadre = true;
-  //   } else {
-  //     this.contextPadre.lineTo(this.cursorXPadre, this.cursorYPadre);
-  //     this.contextPadre.strokeStyle = this.color;
-  //     this.contextPadre.lineWidth = this.width_line;
-  //     this.contextPadre.stroke();
-  //   }
-  // }
-
-  // createSignatureMadre() {
-  //   if (!this.begin_signMadre) {
-  //     this.contextMadre.beginPath();
-  //     this.contextMadre.moveTo(this.cursorXMadre, this.cursorYMadre);
-  //     this.begin_signMadre = true;
-  //   } else {
-  //     // console.log('lineTo ', this.cursorXMadre, this.cursorYMadre);
-  //     this.contextMadre.lineTo(this.cursorXMadre, this.cursorYMadre);
-  //     this.contextMadre.strokeStyle = this.color;
-  //     this.contextMadre.lineWidth = this.width_line;
-  //     this.contextMadre.stroke();
-  //   }
-  // }
-
-
   clearCanvas() {
     const context = this.canvas.getContext('2d');
     if( context )
       context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
-
 
   modalEvents(){
 
@@ -185,10 +131,6 @@ class Signature {
   }
 }
 
-// document.addEventListener("DOMContentLoaded", event => {
-//   new Signature();
-// });
-
 const serializeForm = ( form ) => {
   let obj = {}
   const formData = new FormData( form );
@@ -214,7 +156,6 @@ const mainFormSubmitted =  (event) => {
   };
 
 const signature = new Signature();
-// console.log(signature);
 
 function logSubmit(event) {
   console.log( `Form Submitted! Timestamp: ${event.timeStamp}` );
@@ -222,6 +163,5 @@ function logSubmit(event) {
 }
 
 const form = document.getElementById("main-form");
-console.log(form);
-form.addEventListener("submit", logSubmit);
+form.addEventListener("submit", mainFormSubmitted);
 
