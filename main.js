@@ -104,12 +104,14 @@ document.getElementById("reset").addEventListener("click", () => {
 
 // Target => canvas
 const updateMousePosition = (target, mX, mY) => {
-    const rect = target.getBoundingClientRect();
-    // console.log( rect, mX, mY );
+  // console.log( window.scrollX, window.scrollY );
+     const rect = target.getBoundingClientRect();
     const scaleX = target.width / rect.width;
     const scaleY = target.height / rect.height;
     target.cursorX = Math.floor( ((mX - rect.left)*scaleX)*100)/100;
+     // target.cursorX  -= window.scrollX; 
     target.cursorY = Math.floor( ((mY - rect.top)*scaleY)*100)/100;
+     // target.cursorY -= window.scrollY;
   }
 
 // Target => canvas
@@ -154,7 +156,7 @@ const onMouseMove = ({ target, pageX, pageY }) => {
   
 const  modalEvents = ()=> {
     $("#bookingmodal").on("hidden.bs.modal", function () {
-      // TODO - Quitar eventos
+      // Quitar eventos
       const canvas = document.getElementById('canvas');
       canvas.removeEventListener("mousedown", onMouseDown, false );
       canvas.removeEventListener("mouseup", onMouseUp, false );
@@ -175,6 +177,9 @@ const  modalEvents = ()=> {
     });
 
     $("#bookingmodal").on("show.bs.modal", function (event) {
+      // Esto es una "ñapa" para que funcione el firmado 
+      window.scroll(0,0);
+
       const canvas = document.getElementById('canvas');
       canvas.width_line = 1;
       canvas.color = "#000000";
@@ -186,6 +191,8 @@ const  modalEvents = ()=> {
       
       const button = event.relatedTarget;
       let i = document.getElementById('firmadoPadre');
+      // En el button hay que añadir un attr. data-bs-p con valor Padre o Madre
+      // Para saber que imagen hya que actualziar o de la que hay que dibujar en canvas 
       this.progenitor = button.getAttribute('data-bs-p');
       if(  this.progenitor === 'Madre'){
         i = document.getElementById('firmadoMadre');
@@ -193,6 +200,7 @@ const  modalEvents = ()=> {
       if( i.src ){
         context.drawImage(i, 0, 0);
       }
+      // Se establecen los eventos 
       canvas.addEventListener("mousedown", onMouseDown, false );
       canvas.addEventListener("mouseup", onMouseUp, false );
       canvas.addEventListener('mousemove', onMouseMove, false );
@@ -202,3 +210,13 @@ const  modalEvents = ()=> {
 
 // const signature = new Signature();
 modalEvents();
+// $( document ).on( "mousemove", function( event ) {
+//   $( "#log" ).text( "pageX: " + event.pageX + ", pageY: " + event.pageY );
+// });
+
+// $("body").click(function(e){
+//   var parentOffset = $(this).offset(); 
+//   var relX = e.pageX - parentOffset.left;
+//   var relY = e.pageY - parentOffset.top;
+//   console.log( relX, relY, window.scrollX, window.scrollY );
+// });
