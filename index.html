@@ -8,9 +8,10 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="/main.js"></script>
+    <link href="./style.css" rel="stylesheet"/>
 
   </head>
+
   <body>
 
    <div class="container">
@@ -361,10 +362,213 @@
           <hr class="my-4">
           <button class="w-100 btn btn-primary btn-lg" type="submit" >Enviar la inscripción</button>
         </form>
-      </div>
-    </div>
+        </div>
+   </div>
   
+	 <script>
+			const span = document.getElementById('coords');
+			const spanC = document.getElementById('coords-calc');
 
+			const serializeForm = ( form ) => {
+  			let obj = {}
+  			const formData = new FormData( form );
+  			for( let key of formData.keys() ) {
+	        obj[key]=formData.get(key);
+			  }
+  			return obj;
+			};
+
+			const mainFormSubmitted =  (event) => {
+  			// console.log( event  );
+  			const form = event.target;
+  			const serialized = serializeForm(event.target);
+  			console.log(serialized);
+
+			  // Validaciones del formulario 
+  			// 1º Aceptar protección de datos
+  			if( !serialized['acepta-trat'] ){
+    			event.preventDefault();
+    			event.stopPropagation();
+    			Swal.fire({icon: 'error',title: 'Debe aceptar la protección de datos'});
+    			return;
+  			}
+
+  			// 2º Chequear datos requeridos
+  			if (!form.checkValidity()) {
+    			event.preventDefault();
+    			event.stopPropagation();
+    			let campoErroneo = '';
+    			const campos=[ 
+    				'apellidos',
+    				'apellidos-madre',
+    				'apellidos-padre',
+    				'codpost',
+    				'colegio',
+    				'curso-escolar',
+    				'direccion',
+    				'dni-madre',
+    				'dni-padre',
+    				'email',
+    				'fecha-nacimiento',
+    				'nombre',
+    				'nombre-madre',
+    				'nombre-padre',
+    				'parroquia-bautizo',
+    				'telefono-madre',
+    				'telefono-padre',
+    			];
+
+    			campos.forEach(element => {
+      			if( !serialized[element] ){
+        		Swal.fire({icon: 'error', title: 'Oops...', text: `El campo ${element} es obligatrio`, footer: 'Cumplimentar'});
+        		return;
+      			}
+    			});
+  			}
+  			form.classList.add('was-validated');
+  			
+  			const json = JSON.stringify( serialized );
+/*  			
+				const dataform = document.createElement("form");
+				document.body.appendChild(dataform);
+				dataform.setAttribute("action", "upload_form.php");
+				dataform.setAttribute("enctype", "multipart/form-data");
+				dataform.setAttribute("method", "POST");
+				dataform.setAttribute("target", "_self");
+				dataform.innerHTML='<input type="text" name="jsondata" value="' + json + '" /><input type="submit" value="Click me" />';
+				dataform.submit();
+*/
+				window.location.href = "upload_form.php?name=" + json; 
+			};
+
+			const logSubmit = (event) => {
+  			console.log( `Form Submitted! Timestamp: ${event.timeStamp}` );
+  			event.preventDefault();
+			};
+
+			const form = document.getElementById("main-form");
+			form.addEventListener("submit", mainFormSubmitted);
+
+			const resetCanvas = () => {
+  			const canvas = document.getElementById('canvas');
+  			canvas.width_line = 1;
+  			canvas.color = "#000000";
+				canvas.sign = false;
+  			canvas.begin_sign = false;
+  			canvas.cursorX = 0;
+  			canvas.cursorY = 0;
+  			const context = canvas.getContext('2d');
+  			context.clearRect(0, 0, canvas.width, canvas.height);
+			};
+
+			document.getElementById("reset").addEventListener("click", () => {
+  			resetCanvas();
+			});
+
+			// Target => canvas
+			const updateMousePosition = (target, mX, mY) => {
+     		const rect = target.getBoundingClientRect();
+    		const scaleX = target.width / rect.width;
+    		const scaleY = target.height / rect.height;
+    		target.cursorX = Math.floor( ((mX - rect.left)*scaleX)*100)/100;
+    		target.cursorY = Math.floor( ((mY - rect.top)*scaleY)*100)/100;
+  		}
+
+			// Target => canvas
+			const  createSignature = (target) => {
+    		if( target ){
+      		const context = target.getContext('2d');
+      		// console.log( 'context', context );
+      		if( context ){
+        		if (!target.begin_sign) {
+          		context.beginPath();
+          		context.moveTo(target.cursorX, target.cursorY);
+          		target.begin_sign = true;
+        		} else {
+          		context.lineTo(target.cursorX, target.cursorY);
+          		context.strokeStyle = target.color;
+          		context.lineWidth = target.width_line;
+          		context.stroke();
+        		}
+      		}
+    		}
+			};
+
+			const onMouseDown = ({ target, pageX, pageY }) => {
+  			target.sign = true;
+  			// span.innerText = `md   x: ${ target.cursorX} y; ${target.cursorY}`;
+  			updateMousePosition(target, pageX, pageY);
+			};
+
+			const onMouseUp = ({target}) => {
+  			target.sign = false;
+  			target.begin_sign = false;
+			};
+
+			const onMouseMove = ({ target, pageX, pageY }) => {
+  			span.innerText = `mm   x: ${ pageX} y; ${pageY}`;
+  			updateMousePosition(target, pageX, pageY);
+  			spanC.innerText = `sign: ${ target.sign } begin_sign: ${target.begin_sign}  x: ${ target.cursorX} y; ${target.cursorY}`;
+  			if (target.sign) {
+    			createSignature(target);
+  			}
+			};
+  
+			const  modalEvents = ()=> {
+    		$("#bookingmodal").on("hidden.bs.modal", function () {
+      	// Quitar eventos
+      	const canvas = document.getElementById('canvas');
+      	canvas.removeEventListener("mousedown", onMouseDown, false );
+      	canvas.removeEventListener("mouseup", onMouseUp, false );
+      	canvas.removeEventListener('mousemove', onMouseMove, false );
+
+      	let i = document.getElementById('firmadoPadre');
+      	if(  this.progenitor === 'Madre'){
+        	i = document.getElementById('firmadoMadre');
+      	}
+      	const base64 = canvas.toDataURL();
+      	i.src = base64;
+      	resetCanvas();
+      	canvas.sign = false;
+      	canvas.begin_sign = false;
+      	canvas.cursorX = 0;
+      	canvas.cursorY = 0;
+    	});
+
+    $("#bookingmodal").on("show.bs.modal", function (event) {
+        // Esto es una "ñapa" para que funcione el firmado 
+        window.scroll(0,0);
+
+        const canvas = document.getElementById('canvas');
+        canvas.width_line = 1;
+        canvas.color = "#000000";
+        canvas.sign = false;
+        canvas.begin_sign = false;
+        canvas.cursorX = 0;
+        canvas.cursorY = 0;
+        const context = canvas.getContext('2d');
+      
+        const button = event.relatedTarget;
+        let i = document.getElementById('firmadoPadre');
+        // En el button hay que añadir un attr. data-bs-p con valor Padre o Madre
+        // Para saber que imagen hya que actualziar o de la que hay que dibujar en canvas 
+        this.progenitor = button.getAttribute('data-bs-p');
+        if(  this.progenitor === 'Madre'){
+          i = document.getElementById('firmadoMadre');
+        }
+        if( i.src ){
+          context.drawImage(i, 0, 0);
+        }
+        // Se establecen los eventos 
+        canvas.addEventListener("mousedown", onMouseDown, false );
+        canvas.addEventListener("mouseup", onMouseUp, false );
+        canvas.addEventListener('mousemove', onMouseMove, false );
+      });
+		}
+
+			// Lanza todos los event 
+		modalEvents();
+	 </script>	
 
   </body>
 </html>
